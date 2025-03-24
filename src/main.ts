@@ -23,7 +23,7 @@ function preload(this: Phaser.Scene) {
 }
 
 function create(this: Phaser.Scene) {
-  const pack = this.add.image(400, 300, 'pack').setInteractive().setScale(0.5);
+  const pack = this.add.image(400, 300, 'pack').setInteractive().setScale(0.1);
 
   this.add.text(400, 100, 'Click to Open Pack', {
     font: '24px Arial',
@@ -32,9 +32,9 @@ function create(this: Phaser.Scene) {
 
   pack.on('pointerdown', () => {
     pack.destroy(); // remove pack image
-    this.add.image(250, 300, 'card1').setScale(0.4);
-    this.add.image(400, 300, 'card2').setScale(0.4);
-    this.add.image(550, 300, 'card3').setScale(0.4);
+    this.add.image(250, 300, 'card1').setScale(0.1);
+    this.add.image(400, 300, 'card2').setScale(0.1);
+    this.add.image(550, 300, 'card3').setScale(0.1);
   });
 }
 
