@@ -39,7 +39,11 @@ module.exports = {
         }),
     ],
     devServer: {
-        contentBase: path.resolve(__dirname, 'dist'),
-        open: true,
-    },
+        static: {
+            directory: path.resolve(__dirname, 'dist')
+        },
+        port: 8080,
+        open: true
+    }
+
 };
