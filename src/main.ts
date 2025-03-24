@@ -31,7 +31,7 @@ function create(this: Phaser.Scene) {
 
   const pack = this.add.image(width / 2, height / 2, 'pack')
     .setInteractive()
-    .setScale(0.1);
+    .setScale(0.2);
 
   this.add.text(width / 2, 100, 'Click to Open Pack', {
     font: '24px Arial',
@@ -40,9 +40,9 @@ function create(this: Phaser.Scene) {
 
   pack.on('pointerdown', () => {
     pack.destroy();
-    this.add.image(width * 0.25, height / 2, 'aquatic').setScale(0.1);
-    this.add.image(width * 0.5, height / 2, 'firefox').setScale(0.1);
-    this.add.image(width * 0.75, height / 2, 'plant').setScale(0.1);
+    this.add.image(width * 0.25, height / 2, 'aquatic').setScale(0.2);
+    this.add.image(width * 0.5, height / 2, 'firefox').setScale(0.2);
+    this.add.image(width * 0.75, height / 2, 'plant').setScale(0.2);
   });
 }
 
