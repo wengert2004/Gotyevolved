@@ -11,7 +11,6 @@ class MainMenuScene extends Phaser.Scene {
 
   create() {
     const totalPoints = this.registry.get('totalPoints') || 0;
-    const lastPoints = this.registry.get('lastPoints');
 
     this.add.text(20, 20, `Total Points: ${totalPoints}`, {
       fontSize: '18px',

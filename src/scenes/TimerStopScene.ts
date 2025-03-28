@@ -130,18 +130,6 @@ export class TimerStopScene extends Phaser.Scene {
             color: points === 1000 ? '#00ff00' : '#ffff00'
         }).setOrigin(0.5).setName('result');
 
-        const backRect = this.add.rectangle(GAME_WIDTH / 2, GAME_HEIGHT / 2 - 180, 160, 40, 0x3333aa)
-            .setInteractive({ useHandCursor: true })
-            .setName('result');
-
-        this.add.text(GAME_WIDTH / 2, GAME_HEIGHT / 2 - 180, 'Back to Menu', {
-            fontSize: '18px',
-            color: '#ffffff'
-        }).setOrigin(0.5).setName('result');
-
-        backRect.on('pointerdown', () => {
-            this.scene.start('MainMenuScene');
-        });
     }
 
     private resetGame() {
