@@ -1,10 +1,11 @@
 import Phaser from 'phaser';
+import { addHUD } from '../utils/SceneUI';
+
 
 const GAME_WIDTH = 800;
 const GAME_HEIGHT = 600;
 
 export class TimerStopScene extends Phaser.Scene {
-    private totalPointsText!: Phaser.GameObjects.Text;
     private timerText!: Phaser.GameObjects.Text;
     private actionButton!: Phaser.GameObjects.Text;
     private timerValue = 0;
@@ -17,6 +18,7 @@ export class TimerStopScene extends Phaser.Scene {
     }
 
     create() {
+        addHUD(this);
         this.timerValue = 0;
         this.running = false;
         this.finished = false;
@@ -39,14 +41,6 @@ export class TimerStopScene extends Phaser.Scene {
             fontSize: '32px',
             color: '#ffffff'
         }).setOrigin(0.5);
-
-        const totalPoints = this.registry.get('totalPoints') || 0;
-
-        this.totalPointsText = this.add.text(20, 20, `Total Points: ${totalPoints}`, {
-            fontSize: '18px',
-            color: '#00ffff'
-        }).setOrigin(0, 0);
-
 
         this.timerText = this.add.text(GAME_WIDTH / 2, GAME_HEIGHT / 2, '0.00', {
             fontSize: '48px',
@@ -75,8 +69,8 @@ export class TimerStopScene extends Phaser.Scene {
 
                 const totalPoints = (this.registry.get('totalPoints') || 0) + points;
                 this.registry.set('totalPoints', totalPoints);
-                this.totalPointsText.setText(`Total Points: ${totalPoints}`);
-
+                this.events.emit('updatePoints');
+                
                 this.showResult(points, value);
             } else if (this.finished) {
                 this.resetGame();

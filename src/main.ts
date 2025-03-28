@@ -1,5 +1,8 @@
 import Phaser from 'phaser';
 import { TimerStopScene } from './scenes/TimerStopScene';
+import { SlotMachineScene } from './scenes/SlotMachineScene';
+import { addHUD } from './utils/SceneUI';
+
 
 const GAME_WIDTH = 800;
 const GAME_HEIGHT = 600;
@@ -11,11 +14,7 @@ class MainMenuScene extends Phaser.Scene {
 
   create() {
     const totalPoints = this.registry.get('totalPoints') || 0;
-
-    this.add.text(20, 20, `Total Points: ${totalPoints}`, {
-      fontSize: '18px',
-      color: '#00ffff'
-    }).setOrigin(0, 0);
+    addHUD(this, false); // optionally pass false if you want no back button
 
     this.add.text(GAME_WIDTH / 2, 60, 'Mini-Game Portal', {
       fontSize: '32px',
@@ -24,7 +23,7 @@ class MainMenuScene extends Phaser.Scene {
 
     const buttonLabels = [
       'Gacha Cards\nTBD', 'Angry Birds\nTBD', 'Claw Machine\nTBD',
-      'Slots\nTBD', 'Timer Stop', 'Drag Maze\nTBD',
+      'Slots', 'Timer Stop', 'Drag Maze\nTBD',
       'TBD', 'TBD', 'TBD'
     ];
 
@@ -50,9 +49,10 @@ class MainMenuScene extends Phaser.Scene {
         button.on('pointerdown', () => {
           if (label === 'Timer Stop') {
             this.scene.start('TimerStopScene');
-          } else {
-            console.log(`Clicked ${label}`);
+          } else if (label === 'Slots') {
+            this.scene.start('SlotMachineScene');
           }
+
         });
 
         index++;
@@ -70,5 +70,5 @@ new Phaser.Game({
     mode: Phaser.Scale.FIT,
     autoCenter: Phaser.Scale.CENTER_BOTH
   },
-  scene: [MainMenuScene, TimerStopScene]
+  scene: [MainMenuScene, TimerStopScene, SlotMachineScene]
 });
