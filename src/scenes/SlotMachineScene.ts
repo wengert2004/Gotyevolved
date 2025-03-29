@@ -58,12 +58,13 @@ export class SlotMachineScene extends Phaser.Scene {
         const spacing = width * 0.25
         const startX = width / 2 - spacing
 
-        // Add 3 symbols evenly spaced
         for (let i = 0; i < 3; i++) {
             const key = Phaser.Utils.Array.GetRandom(this.symbols)
             const img = this.add.image(startX + i * spacing, imageY, key)
 
-            const scale = (width * 0.18) / img.width
+            // Scale based on max dimension to normalize visual size
+            const maxSize = width * 0.18
+            const scale = maxSize / Math.max(img.width, img.height)
             img.setScale(scale)
 
             this.reelImages.push(img)
@@ -95,17 +96,47 @@ export class SlotMachineScene extends Phaser.Scene {
     private spin() {
         this.spinning = true
         this.resultText.setText('')
-
+    
         const results: string[] = []
-
+        const { width } = this.scale
+        const maxSize = width * 0.18
+    
+        // Start spinning each reel rapidly
+        const spinIntervals: NodeJS.Timeout[] = []
+    
         this.reelImages.forEach((img, i) => {
-            const key = Phaser.Utils.Array.GetRandom(this.symbols)
-            img.setTexture(key)
-            results[i] = key
+            spinIntervals[i] = setInterval(() => {
+                const key = Phaser.Utils.Array.GetRandom(this.symbols)
+                img.setTexture(key)
+    
+                const frame = this.textures.getFrame(key)
+                const scale = maxSize / Math.max(frame.width, frame.height)
+                img.setScale(scale)
+            }, 50) // Change image every 50ms
         })
-
-        this.evaluateResult(results)
-        this.spinning = false
+    
+        // After 1 second, stop each reel in sequence 0.1s apart
+        this.time.delayedCall(1000, () => {
+            this.reelImages.forEach((img, i) => {
+                this.time.delayedCall(i * 500, () => {
+                    clearInterval(spinIntervals[i])
+    
+                    const key = Phaser.Utils.Array.GetRandom(this.symbols)
+                    img.setTexture(key)
+    
+                    const frame = this.textures.getFrame(key)
+                    const scale = maxSize / Math.max(frame.width, frame.height)
+                    img.setScale(scale)
+    
+                    results[i] = key
+    
+                    if (i === this.reelImages.length - 1) {
+                        this.evaluateResult(results)
+                        this.spinning = false
+                    }
+                })
+            })
+        })
     }
 
     private evaluateResult(results: string[]) {
@@ -114,19 +145,19 @@ export class SlotMachineScene extends Phaser.Scene {
         let message = '❌ No win'
 
         if (a === b && b === c) {
-            score = 100
+            score = 50
             message = '🎉 JACKPOT! You matched all 3!'
         } else if (a === b || b === c || a === c) {
-            score = 25
+            score = 10
             message = '🥈 Small Win! You matched 2!'
         } else if (a === c) {
-            score = 40
+            score = 30
             message = '🎁 Bonus! Matching outer symbols!'
         }
 
-        const totalPoints = (this.registry.get('totalPoints') || 0) + score;
+        const totalPoints = (this.registry.get('totalPoints') || 0) + score
         this.registry.set('totalPoints', totalPoints)
-        this.events.emit('updatePoints');
+        this.events.emit('updatePoints')
         this.resultText.setText(message)
         this.scoreText.setText(`Points: ${score}`)
     }
