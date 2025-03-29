@@ -65,7 +65,6 @@ export class TimerStopScene extends Phaser.Scene {
 
                 const value = this.timerValue.toFixed(2);
                 const points = this.calculatePoints(Number(value));
-                this.registry.set('lastPoints', points);
 
                 const totalPoints = (this.registry.get('totalPoints') || 0) + points;
                 this.registry.set('totalPoints', totalPoints);

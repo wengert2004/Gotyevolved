@@ -1,5 +1,5 @@
 import Phaser from 'phaser'
-import { addHUD } from '../utils/SceneUI';
+import { addHUD } from '../utils/SceneUI'
 
 import slotCherry from '../assets/slotmachinesceneimages/slot_cherries.png'
 import slotDragonFruit from '../assets/slotmachinesceneimages/slot_dragon_fruit.png'
@@ -9,120 +9,125 @@ import slotPear from '../assets/slotmachinesceneimages/slot_pear.png'
 import slotPineapple from '../assets/slotmachinesceneimages/slot_pineapple.png'
 import slotStrawberryRoll from '../assets/slotmachinesceneimages/slot_strawberry_cake_roll.png'
 
-const GAME_WIDTH = 800
-const GAME_HEIGHT = 600
-const SYMBOL_SIZE = 100
-const SPIN_DURATION = 1000
-
 export class SlotMachineScene extends Phaser.Scene {
-  private reelSymbols: Phaser.GameObjects.Image[][] = []
-  private reelContainers: Phaser.GameObjects.Container[] = []
-  private symbols: string[] = []
-  private spinButton!: Phaser.GameObjects.Text
-  private isSpinning = false
+    private symbols: string[] = []
+    private score = 0
+    private spinning = false
+    private reelImages: Phaser.GameObjects.Image[] = []
+    private resultText!: Phaser.GameObjects.Text
+    private scoreText!: Phaser.GameObjects.Text
 
-  preload() {
-    this.load.image('slot_cherries', slotCherry)
-    this.load.image('slot_dragon_fruit', slotDragonFruit)
-    this.load.image('slot_grape', slotGrape)
-    this.load.image('slot_lemon', slotLemon)
-    this.load.image('slot_pear', slotPear)
-    this.load.image('slot_pineapple', slotPineapple)
-    this.load.image('slot_strawberry_cake_roll', slotStrawberryRoll)
-  }
-
-  create() {
-    addHUD(this)
-
-    this.symbols = [
-      'slot_cherries',
-      'slot_dragon_fruit',
-      'slot_grape',
-      'slot_lemon',
-      'slot_pear',
-      'slot_pineapple',
-      'slot_strawberry_cake_roll'
-    ]
-
-    const reelSpacing = 140
-    const centerY = GAME_HEIGHT / 2
-    const centerX = GAME_WIDTH / 2 - reelSpacing
-
-    for (let i = 0; i < 3; i++) {
-      const container = this.add.container(centerX + i * reelSpacing, centerY)
-      const images: Phaser.GameObjects.Image[] = []
-
-      for (let j = -1; j <= 1; j++) {
-        const symbol = Phaser.Utils.Array.GetRandom(this.symbols)
-        const img = this.add.image(0, j * SYMBOL_SIZE, symbol).setDisplaySize(100, 100)
-        images.push(img)
-        container.add(img)
-      }
-
-      const maskShape = this.make.graphics({ x: 0, y: 0})
-      maskShape.fillStyle(0xffffff)
-      maskShape.fillRect(
-        -SYMBOL_SIZE / 2,
-        -SYMBOL_SIZE / 2,
-        SYMBOL_SIZE,
-        SYMBOL_SIZE
-      )
-      const mask = maskShape.createGeometryMask()
-      container.setMask(mask)
-
-      this.reelSymbols.push(images)
-      this.reelContainers.push(container)
+    constructor() {
+        super('SlotMachineScene')
     }
 
-    this.spinButton = this.add.text(GAME_WIDTH / 2, GAME_HEIGHT - 80, 'SPIN', {
-      fontSize: '32px',
-      color: '#ffffff',
-      backgroundColor: '#008800',
-      padding: { x: 20, y: 10 }
-    }).setOrigin(0.5).setInteractive({ useHandCursor: true })
+    preload() {
+        this.load.image('cherry', slotCherry)
+        this.load.image('dragonfruit', slotDragonFruit)
+        this.load.image('grape', slotGrape)
+        this.load.image('lemon', slotLemon)
+        this.load.image('pear', slotPear)
+        this.load.image('pineapple', slotPineapple)
+        this.load.image('strawberryroll', slotStrawberryRoll)
+    }
 
-    this.spinButton.on('pointerdown', () => {
-      if (!this.isSpinning) {
-        this.startSpin()
-      }
-    })
-  }
+    create() {
+        const { width, height } = this.scale
 
-  startSpin() {
-    this.isSpinning = true
+        this.symbols = [
+            'cherry',
+            'dragonfruit',
+            'grape',
+            'lemon',
+            'pear',
+            'pineapple',
+            'strawberryroll'
+        ]
 
-    for (let i = 0; i < this.reelContainers.length; i++) {
-      const container = this.reelContainers[i]
-      const oldSymbols = this.reelSymbols[i]
-      const newSymbols: Phaser.GameObjects.Image[] = []
+        this.reelImages.forEach(img => img.destroy())
+        this.reelImages = []
 
-      // Shift all symbols down visually (simulate reel spin)
-      this.tweens.add({
-        targets: container,
-        y: container.y + SYMBOL_SIZE,
-        duration: SPIN_DURATION,
-        ease: 'Cubic.easeInOut',
-        onComplete: () => {
-          // Reset position to center and replace symbols
-          container.y -= SYMBOL_SIZE
+        addHUD(this)
 
-          // Clear old symbols
-          oldSymbols.forEach(symbol => symbol.destroy())
+        this.add.text(width / 2, height * 0.07, 'Slot Machine', {
+            fontSize: `${Math.floor(height * 0.05)}px`,
+            color: '#ffffff'
+        }).setOrigin(0.5)
 
-          for (let j = -1; j <= 1; j++) {
-            const symbolKey = Phaser.Utils.Array.GetRandom(this.symbols)
-            const img = this.add.image(0, j * SYMBOL_SIZE, symbolKey).setDisplaySize(100, 100)
-            newSymbols.push(img)
-            container.add(img)
-          }
+        const imageY = height * 0.4
+        const spacing = width * 0.25
+        const startX = width / 2 - spacing
 
-          this.reelSymbols[i] = newSymbols
+        // Add 3 symbols evenly spaced
+        for (let i = 0; i < 3; i++) {
+            const key = Phaser.Utils.Array.GetRandom(this.symbols)
+            const img = this.add.image(startX + i * spacing, imageY, key)
 
-          if (i === this.reelContainers.length - 1) {
-            this.isSpinning = false
-          }
+            const scale = (width * 0.18) / img.width
+            img.setScale(scale)
+
+            this.reelImages.push(img)
         }
-      })
+
+        this.resultText = this.add.text(width / 2, height * 0.75, '', {
+            fontSize: `${Math.floor(height * 0.04)}px`,
+            color: '#ffffff'
+        }).setOrigin(0.5)
+
+        this.scoreText = this.add.text(width / 2, height * 0.8, `Score: 0`, {
+            fontSize: `${Math.floor(height * 0.035)}px`,
+            color: '#00ffff'
+        }).setOrigin(0.5)
+
+        const spinBtn = this.add.rectangle(width / 2, height * 0.9, width * 0.3, height * 0.07, 0x44aa44)
+            .setInteractive({ useHandCursor: true })
+
+        this.add.text(width / 2, height * 0.9, 'SPIN', {
+            fontSize: `${Math.floor(height * 0.035)}px`,
+            color: '#ffffff'
+        }).setOrigin(0.5)
+
+        spinBtn.on('pointerdown', () => {
+            if (!this.spinning) this.spin()
+        })
     }
-  }
+
+    private spin() {
+        this.spinning = true
+        this.resultText.setText('')
+
+        const results: string[] = []
+
+        this.reelImages.forEach((img, i) => {
+            const key = Phaser.Utils.Array.GetRandom(this.symbols)
+            img.setTexture(key)
+            results[i] = key
+        })
+
+        this.evaluateResult(results)
+        this.spinning = false
+    }
+
+    private evaluateResult(results: string[]) {
+        const [a, b, c] = results
+        let score = 0
+        let message = '❌ No win'
+
+        if (a === b && b === c) {
+            score = 100
+            message = '🎉 JACKPOT! You matched all 3!'
+        } else if (a === b || b === c || a === c) {
+            score = 25
+            message = '🥈 Small Win! You matched 2!'
+        } else if (a === c) {
+            score = 40
+            message = '🎁 Bonus! Matching outer symbols!'
+        }
+
+        const totalPoints = (this.registry.get('totalPoints') || 0) + score;
+        this.registry.set('totalPoints', totalPoints)
+        this.events.emit('updatePoints');
+        this.resultText.setText(message)
+        this.scoreText.setText(`Points: ${score}`)
+    }
 }
