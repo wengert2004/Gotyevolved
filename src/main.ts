@@ -1,6 +1,7 @@
 import Phaser from 'phaser'
 import { TimerStopScene } from './scenes/TimerStopScene'
 import { SlotMachineScene } from './scenes/SlotMachineScene'
+import { ClawMachineScene } from './scenes/ClawMachineScene'
 import { addHUD } from './utils/SceneUI'
 
 const GAME_WIDTH = 800
@@ -21,7 +22,7 @@ class MainMenuScene extends Phaser.Scene {
     }).setOrigin(0.5)
 
     const buttonLabels = [
-      'Gacha Cards\nTBD', 'Angry Birds\nTBD', 'Claw Machine\nTBD',
+      'Gacha Cards\nTBD', 'Angry Birds\nTBD', 'Claw Machine',
       'Slots', 'Timer Stop', 'Drag Maze\nTBD',
       'TBD', 'TBD', 'TBD'
     ]
@@ -52,6 +53,8 @@ class MainMenuScene extends Phaser.Scene {
             this.scene.start('TimerStopScene')
           } else if (label === 'Slots') {
             this.scene.start('SlotMachineScene')
+          } else if (label === 'Claw Machine') {
+            this.scene.start('ClawMachineScene')
           }
         })
 
@@ -95,7 +98,7 @@ const config: Phaser.Types.Core.GameConfig = {
     mode: Phaser.Scale.FIT,
     autoCenter: Phaser.Scale.CENTER_BOTH
   },
-  scene: [MainMenuScene, TimerStopScene, SlotMachineScene],
+  scene: [MainMenuScene, TimerStopScene, SlotMachineScene, ClawMachineScene],
   physics: {
     default: 'arcade'
   },
