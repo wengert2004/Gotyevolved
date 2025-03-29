@@ -1,91 +1,67 @@
 import Phaser from 'phaser'
-import Matter from 'matter-js'
 
 export class Claw {
     private scene: Phaser.Scene
-    private base: Matter.Body
-    private arms: Matter.Body[]
+    private leftArm: Phaser.GameObjects.Image
+    private rightArm: Phaser.GameObjects.Image
+    private clawBase: Phaser.GameObjects.Image
+
+    // Store offsets for left and right arms relative to the base
+    private leftOffsetX = -25
+    private rightOffsetX = 25
+    private armsOffsetY = 45
+    private scaleRatio: number
 
     constructor(scene: Phaser.Scene, x: number, y: number) {
         this.scene = scene
 
-        // Create base of the claw
-        const baseRect = scene.add.rectangle(x, y, 40, 20, 0xff0000, 0.8)
-        scene.add.existing(baseRect)
-        scene.matter.add.gameObject(baseRect, { isStatic: false })
-        this.base = baseRect.body as Matter.Body
+        // Create parts first
+        this.clawBase = scene.add.image(x, y, 'clawBase')
+        this.leftArm = scene.add.image(x + this.leftOffsetX, y + this.armsOffsetY, 'clawLeft')
+        this.rightArm = scene.add.image(x + this.rightOffsetX, y + this.armsOffsetY, 'clawRight')
 
-        // Create arms
-        this.arms = []
-        const armOffsetX = 25
-        const armLength = 60
+        // Scale based on screen height
+        this.scaleRatio = scene.scale.height * 0.15 / this.clawBase.height
+        this.clawBase.setScale(this.scaleRatio)
+        this.leftArm.setScale(this.scaleRatio)
+        this.rightArm.setScale(this.scaleRatio)
 
-        const leftArm = Matter.Bodies.rectangle(x - armOffsetX, y + armLength / 2, 10, armLength, {
-            chamfer: { radius: 5 }
-        })
-        const rightArm = Matter.Bodies.rectangle(x + armOffsetX, y + armLength / 2, 10, armLength, {
-            chamfer: { radius: 5 }
-        })
+        this.leftArm.setRotation(Phaser.Math.DegToRad(30))
+        this.rightArm.setRotation(Phaser.Math.DegToRad(-30))
+        // Adjust relative offsets with scaling
+        this.leftOffsetX *= this.scaleRatio
+        this.rightOffsetX *= this.scaleRatio
+        this.armsOffsetY *= this.scaleRatio
 
-        this.scene.matter.world.add([leftArm, rightArm])
-        this.arms.push(leftArm, rightArm)
+        // Set interactive base
+        this.clawBase.setInteractive({ draggable: true, useHandCursor: true })
+        scene.input.setDraggable(this.clawBase)
 
-        const leftConstraint = Matter.Constraint.create({
-            bodyA: this.base,
-            bodyB: leftArm,
-            pointA: { x: -armOffsetX, y: 10 },
-            pointB: { x: 0, y: -armLength / 2 },
-            length: 20,
-            stiffness: 0.5
-        })
 
-        const rightConstraint = Matter.Constraint.create({
-            bodyA: this.base,
-            bodyB: rightArm,
-            pointA: { x: armOffsetX, y: 10 },
-            pointB: { x: 0, y: -armLength / 2 },
-            length: 20,
-            stiffness: 0.5
-        })
+        const leftArmOffset = {
+            x: this.leftArm.x - this.clawBase.x,
+            y: this.leftArm.y - this.clawBase.y
+        }
+        const rightArmOffset = {
+            x: this.rightArm.x - this.clawBase.x,
+            y: this.rightArm.y - this.clawBase.y
+        }
 
-        this.scene.matter.world.add([leftConstraint, rightConstraint])
-    }
+        scene.input.on(
+            'drag',
+            (pointer: Phaser.Input.Pointer, gameObject: Phaser.GameObjects.GameObject, dragX: number, dragY: number) => {
+                if (gameObject === this.clawBase) {
+                    const clampedX = Phaser.Math.Clamp(dragX, 50, scene.scale.width - 50)
+                    this.clawBase.x = clampedX
 
-    public getBase(): Matter.Body {
-        return this.base
-    }
+                    // Maintain arm positions relative to the base
+                    this.leftArm.x = clampedX + leftArmOffset.x
+                    this.leftArm.y = this.clawBase.y + leftArmOffset.y
 
-    public contains(x: number, y: number): boolean {
-        const bounds = this.base.bounds
-        return x >= bounds.min.x && x <= bounds.max.x && y >= bounds.min.y && y <= bounds.max.y
-    }
-
-    public startDrag(_: Phaser.Input.Pointer) {
-        // No-op
-    }
-
-    public drag(pointer: Phaser.Input.Pointer) {
-        const width = this.scene.scale.width
-        const newX = Phaser.Math.Clamp(pointer.x, 50, width - 50)
-        const newY = this.base.position.y
-        Matter.Body.setPosition(this.base, { x: newX, y: newY })
-    }
-
-    public drop(callback: () => void) {
-        const originalY = this.base.position.y
-        const dropY = this.scene.scale.height * 0.8
-
-        this.scene.tweens.addCounter({
-            from: originalY,
-            to: dropY,
-            duration: 800,
-            yoyo: true,
-            ease: 'Sine.easeInOut',
-            onUpdate: tween => {
-                const y = tween.getValue()
-                Matter.Body.setPosition(this.base, { x: this.base.position.x, y })
-            },
-            onComplete: callback
-        })
+                    this.rightArm.x = clampedX + rightArmOffset.x
+                    this.rightArm.y = this.clawBase.y + rightArmOffset.y
+                }
+            }
+        )
     }
 }

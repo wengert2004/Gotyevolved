@@ -64,50 +64,23 @@ class MainMenuScene extends Phaser.Scene {
   }
 }
 
-class BlurPostPipeline extends Phaser.Renderer.WebGL.Pipelines.PostFXPipeline {
-  constructor(game: Phaser.Game) {
-    super({
-      game,
-      renderTarget: true,
-      fragShader: `
-        precision mediump float;
-        uniform sampler2D uMainSampler;
-        varying vec2 outTexCoord;
-        void main() {
-          vec4 color = vec4(0.0);
-          float blur = 1.0 / 300.0;
-          for (int x = -4; x <= 4; x++) {
-            for (int y = -4; y <= 4; y++) {
-              vec2 offset = vec2(float(x), float(y)) * blur;
-              color += texture2D(uMainSampler, outTexCoord + offset);
-            }
-          }
-          gl_FragColor = color / 81.0;
-        }
-      `
-    })
-  }
-}
-
 const config: Phaser.Types.Core.GameConfig = {
   type: Phaser.AUTO,
-  width: GAME_WIDTH,
-  height: GAME_HEIGHT,
+  width: 800,
+  height: 600,
   backgroundColor: '#202020',
+  physics: {
+    default: 'matter',
+    matter: {
+      gravity: { x: 0, y: 1 }, // you can tweak gravity as needed
+      debug: true        // turn off later for production
+    }
+  },
   scale: {
     mode: Phaser.Scale.FIT,
     autoCenter: Phaser.Scale.CENTER_BOTH
   },
-  scene: [MainMenuScene, TimerStopScene, SlotMachineScene, ClawMachineScene],
-  physics: {
-    default: 'arcade'
-  },
-  callbacks: {
-    postBoot: (game) => {
-      const renderer = game.renderer as Phaser.Renderer.WebGL.WebGLRenderer
-      renderer.pipelines.add('BlurPostPipeline', new BlurPostPipeline(game))
-    }
-  }
+  scene: [MainMenuScene, TimerStopScene, SlotMachineScene, ClawMachineScene] // include your scenes
 }
 
 new Phaser.Game(config)
