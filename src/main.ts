@@ -83,4 +83,4 @@ const config: Phaser.Types.Core.GameConfig = {
   scene: [MainMenuScene, TimerStopScene, SlotMachineScene, ClawMachineScene] // include your scenes
 }
 
-new Phaser.Game(config)
+const game = new Phaser.Game(config)

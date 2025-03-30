@@ -1,7 +1,7 @@
 {
     "name": "gotyevolved",
     "version": "1.0.0",
-    "description": "A fantasy-themed trading card game developed with Phaser 3, TypeScript, and Webpack.",
+    "description": "Developed with Phaser 3, TypeScript, and Webpack.",
     "scripts": {
         "start": "webpack serve --mode development --open",
         "build": "webpack --mode production"
