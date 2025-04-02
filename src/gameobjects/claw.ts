@@ -33,11 +33,6 @@ export class Claw {
         this.rightOffsetX *= this.scaleRatio
         this.armsOffsetY *= this.scaleRatio
 
-        // Set interactive base
-        this.clawBase.setInteractive({ draggable: true, useHandCursor: true })
-        scene.input.setDraggable(this.clawBase)
-
-
         const leftArmOffset = {
             x: this.leftArm.x - this.clawBase.x,
             y: this.leftArm.y - this.clawBase.y
@@ -46,22 +41,5 @@ export class Claw {
             x: this.rightArm.x - this.clawBase.x,
             y: this.rightArm.y - this.clawBase.y
         }
-
-        scene.input.on(
-            'drag',
-            (pointer: Phaser.Input.Pointer, gameObject: Phaser.GameObjects.GameObject, dragX: number, dragY: number) => {
-                if (gameObject === this.clawBase) {
-                    const clampedX = Phaser.Math.Clamp(dragX, 50, scene.scale.width - 50)
-                    this.clawBase.x = clampedX
-
-                    // Maintain arm positions relative to the base
-                    this.leftArm.x = clampedX + leftArmOffset.x
-                    this.leftArm.y = this.clawBase.y + leftArmOffset.y
-
-                    this.rightArm.x = clampedX + rightArmOffset.x
-                    this.rightArm.y = this.clawBase.y + rightArmOffset.y
-                }
-            }
-        )
     }
 }
