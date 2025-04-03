@@ -1,0 +1,14 @@
+# Unity generated files
+Library/
+Temp/
+Obj/
+Logs/
+UserSettings/
+
+# Visual Studio generated files
+.vs/
+*.csproj
+*.sln
+
+# OS generated files
+.DS_Store
