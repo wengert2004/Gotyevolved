@@ -129,10 +129,10 @@ TextureImporter:
       name: claw_arm_left_0
       rect:
         serializedVersion: 2
-        x: 58
-        y: 96
-        width: 744
-        height: 923
+        x: 0
+        y: 0
+        width: 936
+        height: 1036
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -160,8 +160,7 @@ TextureImporter:
     secondaryTextures: []
     spriteCustomMetadata:
       entries: []
-    nameFileIdTable:
-      claw_arm_left_0: -7913386126612371475
+    nameFileIdTable: {}
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

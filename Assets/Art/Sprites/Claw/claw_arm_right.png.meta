@@ -129,10 +129,10 @@ TextureImporter:
       name: claw_arm_right_0
       rect:
         serializedVersion: 2
-        x: 222
-        y: 96
-        width: 744
-        height: 923
+        x: 944
+        y: 0
+        width: 936
+        height: 1036
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}

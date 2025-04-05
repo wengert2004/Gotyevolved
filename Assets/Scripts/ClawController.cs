@@ -1,17 +1,27 @@
 using UnityEngine;
 using UnityEngine.EventSystems;
 using System.Collections;
+
 public class ClawController : MonoBehaviour, IPointerDownHandler, IPointerUpHandler
 {
     [Header("Claw Setup")]
     public Transform clawBase;         // Main claw root (horizontal mover)
-    public float maxDropDistance = 5;       // How far down the claw drops
-    public Vector3 startPosition;    // Where it resets to
+    public float maxDropDistance = 5;  // How far down the claw drops
+    public Vector3 startPosition;      // Where it resets to
     public float moveSpeed = 2f;
     public float dropSpeed = 3f;
     public Transform leftClaw;
     public Transform rightClaw;
     public bool collisionTriggerClose = false;
+
+    [Header("Claw Joints")]
+    public HingeJoint2D leftClawJoint;
+    public HingeJoint2D rightClawJoint;
+
+    [Header("Motor Settings")]
+    public float clawMotorSpeed = 150f;
+    public float clawMotorTorque = 1000f;
+
     private bool isPressed = false;
     private bool isRunningSequence = false;
 
@@ -35,8 +45,10 @@ public class ClawController : MonoBehaviour, IPointerDownHandler, IPointerUpHand
             StartCoroutine(ClawSequence());
         }
     }
+
     public void OnPointerDown(PointerEventData eventData) => PressClawButton();
     public void OnPointerUp(PointerEventData eventData) => ReleaseClawButton();
+
     void Update()
     {
         if (isPressed && !isRunningSequence)
@@ -50,8 +62,6 @@ public class ClawController : MonoBehaviour, IPointerDownHandler, IPointerUpHand
         isRunningSequence = true;
 
         // 1. Drop claw
-        //Vector3 dropPos = new Vector3(clawBase.position.x, maxDropDistance.position.y, clawBase.position.z);
-
         Vector3 liftToPosition = clawBase.position;
         liftToPosition.y = startPosition.y;
         float droppedDistance = 0;
@@ -89,15 +99,31 @@ public class ClawController : MonoBehaviour, IPointerDownHandler, IPointerUpHand
 
     void CloseClaws()
     {
-        // Example: rotate inwards
-        leftClaw.localRotation = Quaternion.Euler(0, 0, 15);
-        rightClaw.localRotation = Quaternion.Euler(0, 0, -15);
+        SetClawMotor(leftClawJoint, -clawMotorSpeed);   // Rotate inwards
+        SetClawMotor(rightClawJoint, clawMotorSpeed);   // Rotate inwards
+        StartCoroutine(StopClawsAfter(0.5f));
     }
 
     void OpenClaws()
     {
-        // Example: reset to open state
-        leftClaw.localRotation = Quaternion.Euler(0, 0, -50);
-        rightClaw.localRotation = Quaternion.Euler(0, 0, 50);
+        SetClawMotor(leftClawJoint, clawMotorSpeed);    // Rotate outwards
+        SetClawMotor(rightClawJoint, -clawMotorSpeed);  // Rotate outwards
+        StartCoroutine(StopClawsAfter(0.5f));
+    }
+
+    void SetClawMotor(HingeJoint2D joint, float speed)
+    {
+        var motor = joint.motor;
+        motor.motorSpeed = speed;
+        motor.maxMotorTorque = clawMotorTorque;
+        joint.motor = motor;
+        joint.useMotor = true;
+    }
+
+    IEnumerator StopClawsAfter(float delay)
+    {
+        yield return new WaitForSeconds(delay);
+        //leftClawJoint.useMotor = false;
+        //rightClawJoint.useMotor = false;
     }
 }
